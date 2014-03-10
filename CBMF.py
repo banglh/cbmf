@@ -105,7 +105,7 @@ def cbmf_agd(R, P, X, Phi, K, steps, alpha=0.0002, beta=0.02):
     return P, Q.T, Error, Error_Array, Step_Array
 
 # Load Training Data Function
-def loadMovieLens(path='/data/movielens'):
+def loadMovieLens(path='F:/ICE document/cbmf/movielens'):
     movies = {}
     Item_List = []
     Attribute_List = []
@@ -155,6 +155,7 @@ def convert_matrix(Item_List, prefs):
         RatingIndex_List_alluser.append(RatingIndex_List_eachuser)
     
     Ratings_array = np.array(RatingIndex_List_alluser)
+    # R contains ratings in u1.base data set
     R = np.matrix(Ratings_array)
 
     # get user biases
