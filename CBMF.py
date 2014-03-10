@@ -106,7 +106,7 @@ def cbmf_agd(R, P, X, Phi, K, steps, alpha=0.0002, beta=0.02):
 
 # Load Training Data Function
 def loadMovieLens(path='F:/ICE document/cbmf/movielens'):
-    movies = {}
+    # movies = {}
     Item_List = []
     Attribute_List = []
     for line in open(path + '/u.item'):
@@ -118,14 +118,15 @@ def loadMovieLens(path='F:/ICE document/cbmf/movielens'):
         genre = [int(unknown), int(action), int(adventure), int(anime)
                     , int(child), int(comedy), int(crime), int(document), int(drama), int(fantasy), int(noir), int(horror), int(music)
                     , int(mystery), int(romance), int(sci_fi), int(thriller), int(war), int(western)]
-        movies[id] = title
+        # movies[id] = title
         if id not in Item_List : 
             Item_List.append(id)
             Attribute_List.append(genre)
         
     # Load data
     prefs = {}
-    for line in open(path + '/u1.base'):  # u.data
+    # for line in open(path + '/u1.base'):  # u.data
+    for line in open(path + '/u.data'):
         # (User ID,Movie ID,Evaluation,Time Stamp)
         (user, movieid, rating, ts) = line.split('\t')
         prefs.setdefault(user, {})
@@ -137,56 +138,57 @@ def convert_matrix(Item_List, prefs):
     # prefs : Dictionary type, Key:user, Item:rating list  
     User_List = []
     RatingIndex_List_alluser = []
-    item_biases = []
-    user_biases = []
 
     # Creating User List 
     for user in prefs:
         if user not in User_List : User_List.append(user)
     
-    # Creating Rating List
+    ######### Creating Rating List ##########
     for u in User_List:
         RatingIndex_List_eachuser = []        
         for t in Item_List:
             # user evaluated item 
-            if t in prefs[u]:RatingIndex_List_eachuser.append(prefs[u][t])
+            if t in prefs[u]:
+                RatingIndex_List_eachuser.append(prefs[u][t])
             # No rating
-            else:RatingIndex_List_eachuser.append(0.0)         
+            else:
+                RatingIndex_List_eachuser.append(0.0)         
         RatingIndex_List_alluser.append(RatingIndex_List_eachuser)
+    ########## End of Creating Rating List #########
     
     Ratings_array = np.array(RatingIndex_List_alluser)
     # R contains ratings in u1.base data set
     R = np.matrix(Ratings_array)
-
+    RB = np.zeros(1,1)
     # get user biases
-    User_Biases = {}
-    for user in xrange(len(User_List)):
-        observed_count = 0.0
-        for item in xrange(len(Item_List)):
-            if R[user, item] > 0:
-                observed_count += 1.0
-        User_Biases.setdefault(user, 0.0)
-        User_Biases[user] += np.sum(R[user, :]) / observed_count
-
-    # get item biases
-    Item_Biases = {}
-    for item in xrange(len(Item_List)):
-        observed_count = 0.0
-        temp_sum = 0.0
-        for user in xrange(len(User_List)):
-            if R[user, item] > 0:
-                observed_count += 1.0
-                temp_sum += R[user, item]
-        Item_Biases.setdefault(item, 0.0)
-        if observed_count != 0:
-            Item_Biases[item] += np.sum(R[:, item]) / observed_count
-    
-    RB = np.zeros([len(User_List), len(Item_List)])
-    RB = np.matrix(RB)    
-    for u in xrange(len(User_List)):
-        for i in xrange(len(Item_List)):
-            if R[u, i] > 0:
-                RB[u, i] = R[u, i] - User_Biases[u] - Item_Biases[i]
+#     User_Biases = {}
+#     for user in xrange(len(User_List)):
+#         observed_count = 0.0
+#         for item in xrange(len(Item_List)):
+#             if R[user, item] > 0:
+#                 observed_count += 1.0
+#         User_Biases.setdefault(user, 0.0)
+#         User_Biases[user] += np.sum(R[user, :]) / observed_count
+# 
+#     # get item biases
+#     Item_Biases = {}
+#     for item in xrange(len(Item_List)):
+#         observed_count = 0.0
+#         temp_sum = 0.0
+#         for user in xrange(len(User_List)):
+#             if R[user, item] > 0:
+#                 observed_count += 1.0
+#                 temp_sum += R[user, item]
+#         Item_Biases.setdefault(item, 0.0)
+#         if observed_count != 0:
+#             Item_Biases[item] += np.sum(R[:, item]) / observed_count
+#     
+#     RB = np.zeros([len(User_List), len(Item_List)])
+#     RB = np.matrix(RB)    
+#     for u in xrange(len(User_List)):
+#         for i in xrange(len(Item_List)):
+#             if R[u, i] > 0:
+#                 RB[u, i] = R[u, i] - User_Biases[u] - Item_Biases[i]
 
     return User_List, R, RB 
 
@@ -213,7 +215,7 @@ if __name__ == "__main__":
     
     # Parameters
     method = 0
-    step_num = 5000  # 5000
+    step_num = 20  # 5000
     K = 5  # n_f
     alpha_temp = 0.0002  # alpha    0.0002
     beta_temp = 0.02  # beta
